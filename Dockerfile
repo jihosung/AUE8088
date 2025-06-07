@@ -5,6 +5,7 @@ FROM python:3.10
 COPY requirements.txt /tmp/
 RUN pip install --upgrade pip && \
 pip install -r /tmp/requirements.txt
+RUN apt-get update && apt-get install -y libgl1
 
 # 작업 디렉토리 설정 (리눅스 스타일)
 WORKDIR /workspace
