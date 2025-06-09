@@ -136,6 +136,13 @@ class ComputeLoss:
         lcls = torch.zeros(1, device=self.device)  # class loss
         lbox = torch.zeros(1, device=self.device)  # box loss
         lobj = torch.zeros(1, device=self.device)  # object loss
+        
+        # Ignore people and person? class losses
+        ignored_classes = [2, 3]  # 2: people, 3: person?
+        if targets.numel():
+            mask = ~torch.isin(targets[:, 1], torch.tensor(ignored_classes, device=targets.device))
+            targets = targets[mask]
+
         tcls, tbox, indices, anchors = self.build_targets(p, targets)  # targets
 
         # Losses

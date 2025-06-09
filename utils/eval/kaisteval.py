@@ -128,6 +128,13 @@ class KAISTPedEval(COCOeval):
         # set ignore flag
         for gt in gts:
             gt['ignore'] = gt['ignore'] if 'ignore' in gt else 0
+
+            # 추가된 코드: people (2), person? (3) 클래스는 평가에서 무시
+            if gt.get('category_id', -1) in [2, 3]:
+                gt['ignore'] = 1
+                gt['iscrowd'] = 1
+                continue
+            
             gbox = gt['bbox']
             gt['ignore'] = 1 \
                 if gt['height'] < self.params.HtRng[id_setup][0] \
