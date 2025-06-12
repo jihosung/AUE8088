@@ -130,3 +130,45 @@
     - If you run `train_simple.py` with the default setting, predictions on `test-all-20.txt` will be generated: `runs/train/*/epoch*_predictions.json`
     - You can download this file onto your computer.
     - Note: if size of the prediction file is too large (about > 30MB), evaluation on the server could be failed.
+
+### Evaluation에 관하여
+- EvalAI 제출용 학습 코드
+    - 모든 Training 데이터 학습
+    - Test 데이터에 대한 예측 `runs/train/*/epoch*_predictions.json`에 생성됨
+    - Command
+      ```bash
+      $ python train_simple.py \
+        --img 640 \
+        --batch-size 16 \
+        --epochs 20 \
+        --data data/kaist-rgbt.yaml \
+        --cfg models/yolov5n_kaist-rgbt.yaml \
+        --weights yolov5n.pt \
+        --workers 8 \
+        --name yolov5n-rgbt-forSubmit \
+        --entity $WANDB_ENTITY \
+        --rgbt \
+        --single-cls
+      ```
+
+- 모델 튜닝용 학습 코드
+    - Train/val 분할 필요
+        - Train 데이터로 training
+        - Val 데이터로 validation
+    - validation에 대한 결과(예측/Metric)가 `runs/train/*/epoch*_predictions.json`에 생성됨
+        - 이 파일은 EvalAI에 업로드하지 말것
+    - Command
+      ```bash
+      $ python train_simple.py \
+        --img 640 \
+        --batch-size 16 \
+        --epochs 20 \
+        --data data/kaist-rgbt-split.yaml \
+        --cfg models/yolov5n_kaist-rgbt.yaml \
+        --weights yolov5n.pt \
+        --workers 8 \
+        --name yolov5n-rgbt-forTune \
+        --entity $WANDB_ENTITY \
+        --rgbt \
+        --single-cls
+      ```
