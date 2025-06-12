@@ -137,11 +137,11 @@ class ComputeLoss:
         lbox = torch.zeros(1, device=self.device)  # box loss
         lobj = torch.zeros(1, device=self.device)  # object loss
         
-        # Ignore people and person? class losses
-        ignored_classes = [2, 3]  # 2: people, 3: person?
-        if targets.numel():
-            mask = ~torch.isin(targets[:, 1], torch.tensor(ignored_classes, device=targets.device))
-            targets = targets[mask]
+        # 추가된 코드: Ignore people and person? class losses
+        # ignored_classes = [2, 3]  # 2: people, 3: person?
+        # if targets.numel():
+        #     mask = ~torch.isin(targets[:, 1], torch.tensor(ignored_classes, device=targets.device))
+        #     targets = targets[mask]
 
         tcls, tbox, indices, anchors = self.build_targets(p, targets)  # targets
 
@@ -176,11 +176,11 @@ class ComputeLoss:
                 keep = ~ign_idx
 
                 # 추가된 코드: people, person? 클래스 제외하고 남은게 없을 때 예외처리
-                if (
-                    keep.numel() == 0 or keep.sum() == 0 or
-                    b.ndim == 0 or a.ndim == 0 or gj.ndim == 0 or gi.ndim == 0 or iou.ndim == 0
-                ):
-                    continue
+                # if (
+                #     keep.numel() == 0 or keep.sum() == 0 or
+                #     b.ndim == 0 or a.ndim == 0 or gj.ndim == 0 or gi.ndim == 0 or iou.ndim == 0
+                # ):
+                #     continue
 
                 b, a, gj, gi, iou = b[keep], a[keep], gj[keep], gi[keep], iou[keep]
 
