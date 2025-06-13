@@ -287,7 +287,17 @@ def train(hyp, opt, device, callbacks):
             # Forward
             with torch.amp.autocast(device_type=device.type):
                 pred = model(imgs)  # forward
-                loss, loss_items = compute_loss(pred, targets.to(device))  # loss scaled by batch_size
+                # loss, loss_items = compute_loss(pred, targets.to(device))  # loss scaled by batch_size
+                
+                # 추가: find error
+                try:
+                    loss, loss_items = compute_loss(pred, targets)
+                except Exception as e:
+                    print("🔥 Error during loss computation")
+                    print("Paths:", paths)
+                    print("Targets:", targets)
+                    raise e  # 또는 sys.exit(1)으로 강제 종료
+                
                 if opt.quad:
                     loss *= 4.0
 
