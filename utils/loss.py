@@ -167,6 +167,15 @@ class ComputeLoss:
                 # do not calculate objectness loss
                 ign_idx = (tcls[i] == -1) & (iou > self.hyp["iou_t"])
                 keep = ~ign_idx
+
+                # 추가된 코드: custom validation set 사용 시 tensor가 비었을 때 예외처리 필요
+                if (
+                    keep.numel() == 0 or keep.sum() == 0 or
+                    b.ndim == 0 or a.ndim == 0 or gj.ndim == 0 or gi.ndim == 0 or iou.ndim == 0
+                ):
+                    continue
+
+
                 b, a, gj, gi, iou = b[keep], a[keep], gj[keep], gi[keep], iou[keep]
 
                 tobj[b, a, gj, gi] = iou  # iou ratio
