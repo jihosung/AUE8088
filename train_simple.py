@@ -291,7 +291,7 @@ def train(hyp, opt, device, callbacks):
                 
                 # 추가: find error
                 try:
-                    loss, loss_items = compute_loss(pred, targets)
+                    loss, loss_items = compute_loss(pred, targets.to(device))
                 except Exception as e:
                     print("🔥 Error during loss computation")
                     print("Paths:", paths)

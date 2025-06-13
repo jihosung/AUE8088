@@ -152,7 +152,14 @@ class ComputeLoss:
                 pxy = pxy.sigmoid() * 2 - 0.5
                 pwh = (pwh.sigmoid() * 2) ** 2 * anchors[i]
                 pbox = torch.cat((pxy, pwh), 1)  # predicted box
-                iou = bbox_iou(pbox, tbox[i], CIoU=True).squeeze()  # iou(prediction, target)
+
+                # 추가: log
+                # iou = bbox_iou(pbox, tbox[i], CIoU=True)  # iou(prediction, target)
+                # print("iou:", iou)
+
+                # 추가: bug fix
+                # iou = bbox_iou(pbox, tbox[i], CIoU=True).squeeze()  # original code
+                iou = bbox_iou(pbox, tbox[i], CIoU=True).view(-1)  # new ver. ex) iou가 [0.1]일때 0.1로 만들어버리는것 해결
                 lbox += (1.0 - iou).mean()  # iou loss
 
                 # Objectness
@@ -165,6 +172,11 @@ class ComputeLoss:
 
                 # If prediction is matched (iou > 0.5) with bounding box marked as ignore,
                 # do not calculate objectness loss
+
+                # 추가: log
+                # print("iou before ign:",iou)
+                # print("[b,a,gj,ji,iou] before ign = ", b.shape, " ",a.shape, " ", gj.shape, " ", gi.shape, " ", iou.shape)
+
                 ign_idx = (tcls[i] == -1) & (iou > self.hyp["iou_t"])
                 keep = ~ign_idx
 
@@ -174,10 +186,17 @@ class ComputeLoss:
                 #     b.ndim == 0 or a.ndim == 0 or gj.ndim == 0 or gi.ndim == 0 or iou.ndim == 0
                 # ):
                 #     continue
-
-
-                b, a, gj, gi, iou = b[keep], a[keep], gj[keep], gi[keep], iou[keep]
-
+                
+                # 추가: bug detect
+                try:
+                    b, a, gj, gi, iou = b[keep], a[keep], gj[keep], gi[keep], iou[keep]
+                except Exception as e:
+                    print("🔥 Error during loss computation")
+                    print("ign_idx:", ign_idx.shape)
+                    print("keep:", keep)
+                    print("[b,a,gj,ji,iou] = ", b.shape, " ",a.shape, " ", gj.shape, " ", gi.shape, " ", iou.shape)
+                    raise e  # 또는 sys.exit(1)으로 강제 종료
+                
                 tobj[b, a, gj, gi] = iou  # iou ratio
 
                 # Classification
