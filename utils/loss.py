@@ -200,7 +200,7 @@ class ComputeLoss:
 
                     ign_idx = ign_idx | ioa_mask
                 
-                print("ign_idx:", ign_idx.shape)
+                # print("ign_idx:", ign_idx.shape)
                 keep = ~ign_idx
                 
                 # 추가: bug detect

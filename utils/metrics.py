@@ -379,6 +379,7 @@ def bbox_ioa(box1, box2, xywh=True, eps=1e-7):
     pbox = w1 * h1 + eps
     # print("box2(target):", box2)
     # print("box1(pbox) area:", pbox)
+    
     # IoA
     ioa = inter / pbox
     # print("ioa in func:",ioa)
