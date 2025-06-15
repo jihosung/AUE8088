@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 
 from utils.metrics import bbox_iou
+from utils.metrics import bbox_ioa
+from utils.general import xywh2xyxy
 from utils.torch_utils import de_parallel
 
 
@@ -152,6 +154,7 @@ class ComputeLoss:
                 pxy = pxy.sigmoid() * 2 - 0.5
                 pwh = (pwh.sigmoid() * 2) ** 2 * anchors[i]
                 pbox = torch.cat((pxy, pwh), 1)  # predicted box
+                
 
                 # 추가: log
                 # iou = bbox_iou(pbox, tbox[i], CIoU=True)  # iou(prediction, target)
@@ -177,15 +180,28 @@ class ComputeLoss:
                 # print("iou before ign:",iou)
                 # print("[b,a,gj,ji,iou] before ign = ", b.shape, " ",a.shape, " ", gj.shape, " ", gi.shape, " ", iou.shape)
 
-                ign_idx = (tcls[i] == -1) & (iou > self.hyp["iou_t"])
-                keep = ~ign_idx
+                # 추가: ioa metric 코드
+                # GT가 crowd(-1)인 것만 필터링
+                crowd_mask = tcls[i] == -1
+                ign_idx = (tcls[i] == -1) & (iou > self.hyp["iou_t"])  # IoU 조건
+                # print("iou_mask:", ign_idx.shape)
 
-                # 추가된 코드: custom validation set 사용 시 tensor가 비었을 때 예외처리 필요
-                # if (
-                #     keep.numel() == 0 or keep.sum() == 0 or
-                #     b.ndim == 0 or a.ndim == 0 or gj.ndim == 0 or gi.ndim == 0 or iou.ndim == 0
-                # ):
-                #     continue
+                if crowd_mask.any(): # -1인 GT가 있다면
+                    ioa = bbox_ioa(pbox, tbox[i]).view(-1)
+                    ioa = ioa.detach().clamp(0).type(tobj.dtype)
+                    # print("ioa:", ioa.shape)
+                    # print("tcls[i]==-1:", (tcls[i] == -1).shape)
+                    ioa_mask = (tcls[i] == -1) & (ioa > 0.6)  # IoA 조건
+                    # print("ioa_mask:", ioa_mask.shape)
+
+                    # 둘 중 하나라도 만족하면 ignore
+                    # check_idx = (ign_idx == False) & (ioa_mask == True) # iou에서는 못거르던거 ioa로 거른놈 체크
+                    # print("check_idx:", check_idx)
+
+                    ign_idx = ign_idx | ioa_mask
+                
+                print("ign_idx:", ign_idx.shape)
+                keep = ~ign_idx
                 
                 # 추가: bug detect
                 try:
