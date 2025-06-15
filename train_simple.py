@@ -145,6 +145,14 @@ def train(hyp, opt, device, callbacks):
         weights = attempt_download(weights)  # download if not found locally
         ckpt = torch.load(weights, map_location="cpu")  # load checkpoint to CPU to avoid CUDA memory leak
         model = Model(cfg or ckpt["model"].yaml, ch=3, nc=nc, anchors=hyp.get("anchors")).to(device)  # create
+
+        # 디버깅용: anchor 정보 출력
+        if hasattr(model.model[-1], 'anchors'):
+            anchors_tensor = model.model[-1].anchors  # detection layer의 anchor
+            print(f"\n✅ Loaded anchors (stride-wise):\n{anchors_tensor}")
+        else:
+            print("⚠️ No anchor attribute found in the detection head.")
+
         exclude = ["anchor"] if (cfg or hyp.get("anchors")) else []  # exclude keys
         csd = ckpt["model"].float().state_dict()  # checkpoint state_dict as FP32
         csd = intersect_dicts(csd, model.state_dict(), exclude=exclude)  # intersect
@@ -152,6 +160,14 @@ def train(hyp, opt, device, callbacks):
         LOGGER.info(f"Transferred {len(csd)}/{len(model.state_dict())} items from {weights}")  # report
     else:
         model = Model(cfg, ch=3, nc=nc, anchors=hyp.get("anchors")).to(device)  # create
+
+        # 디버깅용: anchor 정보 출력
+        if hasattr(model.model[-1], 'anchors'):
+            anchors_tensor = model.model[-1].anchors  # detection layer의 anchor
+            print(f"\n✅ Loaded anchors (stride-wise):\n{anchors_tensor}")
+        else:
+            print("⚠️ No anchor attribute found in the detection head.")
+        
     amp = check_amp(model)  # check AMP
 
     # Image size
