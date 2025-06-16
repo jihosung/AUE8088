@@ -194,6 +194,7 @@ def train(hyp, opt, device, callbacks):
     best_fitness, start_epoch = 0.0, 0
 
     # Trainloader
+    print("train_loader:")
     train_loader, dataset = create_dataloader(
         train_path,
         imgsz,
@@ -201,7 +202,8 @@ def train(hyp, opt, device, callbacks):
         gs,
         single_cls,
         hyp=hyp,
-        augment=False,      # TODO: make it work
+        # augment=False,      # TODO: make it work
+        augment=True,         # apply aumentation
         cache=None if opt.cache == "val" else opt.cache,
         rect=opt.rect,
         rank=-1,
@@ -218,6 +220,7 @@ def train(hyp, opt, device, callbacks):
     assert mlc < nc, f"Label class {mlc} exceeds nc={nc} in {data}. Possible class labels are 0-{nc - 1}"
 
     # Valloader
+    print("val_loader:")
     val_loader = create_dataloader(
         val_path,
         imgsz,

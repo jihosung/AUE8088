@@ -127,20 +127,29 @@ class KAISTPedEval(COCOeval):
 
         # set ignore flag
         for gt in gts:
-            gt['ignore'] = gt['ignore'] if 'ignore' in gt else 0
+            gt['ignore'] = gt.get('ignore', 0)
             gbox = gt['bbox']
-            gt['ignore'] = 1 \
-                if gt['height'] < self.params.HtRng[id_setup][0] \
-                or gt['height'] > self.params.HtRng[id_setup][1] \
-                or gt['occlusion'] not in self.params.OccRng[id_setup] \
-                or gbox[0] < self.params.bndRng[0] \
-                or gbox[1] < self.params.bndRng[1] \
-                or gbox[0] + gbox[2] > self.params.bndRng[2] \
-                or gbox[1] + gbox[3] > self.params.bndRng[3] \
-                else gt['ignore']
-            # to use cocoeval
+
+            # 추가: category 무시: cyclist, people, person?
+            if gt['category_id'] in [1, 2, 3]:
+                gt['ignore'] = 1
+
+            # 기존 조건(가독성 개선): height, occlusion, boundary
+            if (
+                gt['height'] < self.params.HtRng[id_setup][0]
+                or gt['height'] > self.params.HtRng[id_setup][1]
+                or gt['occlusion'] not in self.params.OccRng[id_setup]
+                or gbox[0] < self.params.bndRng[0]
+                or gbox[1] < self.params.bndRng[1]
+                or gbox[0] + gbox[2] > self.params.bndRng[2]
+                or gbox[1] + gbox[3] > self.params.bndRng[3]
+            ):
+                gt['ignore'] = 1
+
+            # required by coco-style eval
             gt['iscrowd'] = gt['ignore']
 
+          
         self._gts = defaultdict(list)       # gt for evaluation
         self._dts = defaultdict(list)       # dt for evaluation
         for gt in gts:

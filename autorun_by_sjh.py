@@ -26,15 +26,15 @@ python train_simple.py \
     --cfg models/yolov5n_kaist-rgbt.yaml \
     --weights yolov5n.pt \
     --workers 8 \
-    --name yolov5n-rgbt-forTune \
+    --name yolov5n-rgbt-forTune-dataAug-lowHyp \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls
 """
 
 # 실행
-print("🚀 Running first command...")
-subprocess.run(cmd1, shell=True, check=True)
+# print("🚀 Running first command...")
+# subprocess.run(cmd1, shell=True, check=True)
 
 print("🚀 Running second command...")
 subprocess.run(cmd2, shell=True, check=True)
