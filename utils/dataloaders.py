@@ -1251,6 +1251,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
             np.clip(x, 0, 2 * s, out=x)  # clip when using random_perspective()
         # img4, labels4 = replicate(img4, labels4)  # replicate
 
+        print("[load mosaic] img size before random perspective:", img4_lwir.shape)
         # Augment
         # img4, labels4, segments4 = copy_paste(img4, labels4, segments4, p=self.hyp["copy_paste"]) # no segments in kaist-rgbt
         img4_lwir, labels4, M = random_perspective(
@@ -1263,7 +1264,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
             shear=self.hyp["shear"],
             perspective=self.hyp["perspective"],
             border=self.mosaic_border,
-        )  # border to remove
+        )
         # print("M in lwir:", M)
         img4_vis = self.apply_random_perspective_matrix_M( 
             img4_vis,
@@ -1276,6 +1277,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
             perspective=self.hyp["perspective"],
             border=self.mosaic_border,
         )
+        print("[load mosaic] img size after random perspective:", img4_lwir.shape)
 
         return (img4_lwir, img4_vis), labels4
     
@@ -1327,6 +1329,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
             # TODO: Load mosaic
             # ✅ Mosaic 수행, labels: xyxy 뱉음
             (img_lwir, img_vis), labels = self.load_mosaic_rgbt(index)
+            print("[mosaic] img size after mosaic:", img_lwir.shape)
             nl = len(labels)
             # print(f"[AUG] mosaic applied!")
 
@@ -1356,7 +1359,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
             #         if nl:
             #             labels[:, 1] = 1 - labels[:, 1]
 
-            shapes = ((self.img_size, self.img_size), ((1.0, 1.0), (0.0, 0.0))) # dummy shape for mosaic
+            shapes = None # dummy shape for mosaic
 
             # TODO: MixUp augmentation
             if random.random() < hyp["mixup"]:
@@ -1394,7 +1397,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
                 img_lwir, labels, M = random_perspective(
                     img_lwir,
                     labels,
-                    segments4=(),
+                    segments=(),
                     degrees=self.hyp["degrees"],
                     translate=self.hyp["translate"],
                     scale=self.hyp["scale"],
@@ -1406,7 +1409,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
                 img_vis = self.apply_random_perspective_matrix_M( 
                     img_vis,
                     M, # lwir에 썼던 transform matrix 재사용
-                    segments4=(),
+                    segments=(),
                     degrees=self.hyp["degrees"],
                     translate=self.hyp["translate"],
                     scale=self.hyp["scale"],

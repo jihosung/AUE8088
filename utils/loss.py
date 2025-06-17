@@ -163,7 +163,12 @@ class ComputeLoss:
                 # 추가: bug fix
                 # iou = bbox_iou(pbox, tbox[i], CIoU=True).squeeze()  # original code
                 iou = bbox_iou(pbox, tbox[i], CIoU=True).view(-1)  # new ver. ex) iou가 [0.1]일때 0.1로 만들어버리는것 해결
-                lbox += (1.0 - iou).mean()  # iou loss
+                # lbox += (1.0 - iou).mean()  # iou loss
+
+                # 추가: 작은 object weight 추가
+                area = (pwh[:,0] * pwh[:,1]).clamp(min=1e-6)
+                weight = 1.0 / torch.sqrt(area)      #작을수록 weight 증가
+                lbox += ((1.0 - iou) * weight).mean()
 
                 # Objectness
                 iou = iou.detach().clamp(0).type(tobj.dtype)

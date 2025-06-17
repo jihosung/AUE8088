@@ -156,9 +156,11 @@ def random_perspective(
 ):
     # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.9, 1.1), shear=(-10, 10))
     # targets = [cls, xyxy]
-
+    print("[random perspective] input img size:", im.shape)
+    print("[random perspective] border:", border)
     height = im.shape[0] + border[0] * 2  # shape(h,w,c)
     width = im.shape[1] + border[1] * 2
+    print("[random perspective] h,w:", height, width)
 
     # Center
     C = np.eye(3)
