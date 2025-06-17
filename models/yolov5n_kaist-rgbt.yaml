@@ -26,9 +26,9 @@ anchors:
   # - [39,103, 51,146, 73,221]      # stride 32 (large objects)
 
   # new anchors: IoU distance based k-means
-  - [13, 46, 9, 133, 33, 66]  # P3/8
-  - [22, 146, 64, 86, 38, 161]  # P4/16
-  - [57, 136, 89, 131, 74, 179]  # P5/32
+  - [21, 49, 22, 64, 25, 78]       # Stride 8 (small)
+  - [32, 80, 36, 105, 44, 134]     # Stride 16 (medium)
+  - [56, 165, 72, 222, 91, 298]    # Stride 32 (large)
 
   # new anchors: IoU distance based k-means, same Cluster N
   # - [20,52, 24,66, 29,81]     # 작은 객체용 (ID 5, 9, 2)
