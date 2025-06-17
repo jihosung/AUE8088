@@ -238,7 +238,7 @@ def random_perspective(
         targets = targets[i]
         targets[:, 1:5] = new[i]
 
-    return im, targets
+    return im, targets, M # additional output M to rotate lwir, vis same
 
 
 def copy_paste(im, labels, segments, p=0.5):
