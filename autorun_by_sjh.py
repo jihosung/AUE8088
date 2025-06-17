@@ -1,6 +1,6 @@
 import subprocess
 
-# 첫 번째 명령어 (문자 그대로)
+# 첫 번째 명령어
 cmd1 = """
 python train_simple.py \
     --img 640 \
