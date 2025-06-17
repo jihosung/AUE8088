@@ -6,15 +6,14 @@ python train_simple.py \
     --img 640 \
     --batch-size 16 \
     --epochs 20 \
-    --data data/kaist-rgbt.yaml \
+    --data data/kaist-rgbt-split.yaml \
     --cfg models/yolov5n_kaist-rgbt.yaml \
     --weights yolov5n.pt \
     --workers 8 \
-    --name yolov5n-rgbt-forSubmit \
+    --name yolov5n-rgbt-forTune-dataAug-lowHyp-newIoUAnchor-sameClusterN \
     --entity $WANDB_ENTITY \
     --rgbt \
-    --single-cls \
-    --hyp data/hyps/hyp.scratch-med.yaml
+    --single-cls
 """
 
 # 두 번째 명령어
@@ -23,15 +22,14 @@ python train_simple.py \
     --img 640 \
     --batch-size 16 \
     --epochs 20 \
-    --data data/kaist-rgbt-split.yaml \
+    --data data/kaist-rgbt.yaml \
     --cfg models/yolov5n_kaist-rgbt.yaml \
     --weights yolov5n.pt \
-    --workers 8 \
-    --name yolov5n-rgbt-forTune-dataAug-lowHyp \
+    --workers 6 \
+    --name yolov5n-rgbt-forSubmit-newIoUAnchor-sameClusterN \
     --entity $WANDB_ENTITY \
     --rgbt \
-    --single-cls \
-    --hyp data/hyps/hyp.scratch-med.yaml
+    --single-cls
 """
 
 # 실행
