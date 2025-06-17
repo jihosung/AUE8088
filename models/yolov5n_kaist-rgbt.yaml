@@ -21,9 +21,19 @@ anchors:
   # - [43,122, 51,146, 73,221]
 
   # new anchors: 각 stride끼리 겹치는 크기 존재하게 수정
-  - [20,50, 25,67, 30,73]         # stride 8 (small objects)
-  - [22,61, 33,89, 43,122]        # stride 16 (medium objects)
-  - [39,103, 51,146, 73,221]      # stride 32 (large objects)
+  # - [20,50, 25,67, 30,73]         # stride 8 (small objects)
+  # - [22,61, 33,89, 43,122]        # stride 16 (medium objects)
+  # - [39,103, 51,146, 73,221]      # stride 32 (large objects)
+
+  # new anchors: IoU distance based k-means
+  # - [21, 49, 22, 64, 25, 78]       # Stride 8 (small)
+  # - [32, 80, 36, 105, 44, 134]     # Stride 16 (medium)
+  # - [56, 165, 72, 222, 91, 298]    # Stride 32 (large)
+
+  # new anchors: IoU distance based k-means, same Cluster N
+  - [20,52, 24,66, 29,81]     # 작은 객체용 (ID 5, 9, 2)
+  - [31,76, 30,86, 38,116]    # 중간 객체용 (ID 7, 8, 4)
+  - [41,121, 47,151, 74,225]  # 큰 객체용 (ID 6, 3, 1)
 
 # YOLOv5 v6.0 backbone
 backbone:
