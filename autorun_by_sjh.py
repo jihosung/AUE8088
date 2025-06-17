@@ -13,7 +13,8 @@ python train_simple.py \
     --name yolov5n-rgbt-forSubmit \
     --entity $WANDB_ENTITY \
     --rgbt \
-    --single-cls
+    --single-cls \
+    --hyp data/hyps/hyp.scratch-med.yaml
 """
 
 # 두 번째 명령어
@@ -29,12 +30,13 @@ python train_simple.py \
     --name yolov5n-rgbt-forTune-dataAug-lowHyp \
     --entity $WANDB_ENTITY \
     --rgbt \
-    --single-cls
+    --single-cls \
+    --hyp data/hyps/hyp.scratch-med.yaml
 """
 
 # 실행
-# print("🚀 Running first command...")
-# subprocess.run(cmd1, shell=True, check=True)
+print("🚀 Running first command...")
+subprocess.run(cmd1, shell=True, check=True)
 
 print("🚀 Running second command...")
 subprocess.run(cmd2, shell=True, check=True)
