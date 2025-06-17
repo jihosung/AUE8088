@@ -1328,7 +1328,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
             # ✅ Mosaic 수행, labels: xyxy 뱉음
             (img_lwir, img_vis), labels = self.load_mosaic_rgbt(index)
             nl = len(labels)
-            print(f"[AUG] mosaic applied!")
+            # print(f"[AUG] mosaic applied!")
 
             # Todo: 얘네들은 xywhn 좌표계 기준이라 mosaic output 변환 후 augment 해야함
             # Todo: lwir, vis 대응하게 만들기
@@ -1370,7 +1370,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
 
         else: # when mosaic == False
             # 추가: lwir, vis 둘 다에 augmentation 적용 =============================================
-            print(f"[AUG] mosaic NOT applied")
+            # print(f"[AUG] mosaic NOT applied")
             # Load image
             imgs, hw0s, hw1s = self.load_image(index)  # imgs: [lwir, visible]
             img_lwir, img_vis = imgs
