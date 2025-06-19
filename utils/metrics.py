@@ -42,29 +42,71 @@ def ap_per_class(tp, conf, pred_cls, target_cls, plot=False, save_dir=".", names
         The average precision as computed in py-faster-rcnn.
     """
 
+    """
+    추가 설명:
+    tp: correct 변수를 받아온것, size = (예측 박스 개수, true/false 판단 기준 iou 개수)
+        - correct ex) 2 x 10 correct: 총 예측 박스 2개, 첫번째 박스는 iou = 0.75 기준까지 예측 성공, 두번째 박스는 모든 기준에서 예측 실패
+            [[ True,  True,  True,  True,  True,  True, False, False, False, False],
+            [False, False, False, False, False, False, False, False, False, False]]
+    conf: confidence, 여기 object가 있다! 하는 확률 0-1
+    pred_cls: 모델이 예측한 class
+    target_cls: GT class
+    """
     # Sort by objectness
     i = np.argsort(-conf)
     tp, conf, pred_cls = tp[i], conf[i], pred_cls[i]
 
     # Find unique classes
     unique_classes, nt = np.unique(target_cls, return_counts=True)
+    """
+    unique 과정
+    target_cls(GT) = [0, 1, 1, 1, 0, 0, 0] 이라면
+    종류 -> unique_classes = [0, 1]
+    각 클래스 개수 -> nt = [4, 3]
+    으로 반환. 각 클래스가 몇개인지 세는 과정
+    """
 
     # remove ignore class
-    unique_classes = unique_classes[unique_classes != -1]
-    nc = unique_classes.shape[0]  # number of classes, number of detections
+    unique_idx = unique_classes != -1
+    unique_classes = unique_classes[unique_idx]
+    nt = nt[unique_idx] # nt 필터링 안해서 recall > 1이었음
+    nc = unique_classes.shape[0]  # number of classes, number of detections (클래스 종류 개수 - 이번 이미지에는 0,1 클래스만 있다면 nc = 2)
 
     # Create Precision-Recall curve and compute AP for each class
     px, py = np.linspace(0, 1, 1000), []  # for plotting
     ap, p, r = np.zeros((nc, tp.shape[1])), np.zeros((nc, 1000)), np.zeros((nc, 1000))
-    for ci, c in enumerate(unique_classes):
-        i = pred_cls == c
-        n_l = nt[ci]  # number of labels
+    for ci, c in enumerate(unique_classes): # 현재 이미지의 GT 클래스 0, 1 이라면 그걸 돌겠다
+        i = pred_cls == c # 예측된 class가 c인 index i
+        n_l = nt[ci]  # number of GT labels, 클래스 1개에 대한것 (ex: person 클래스에 대해서만 precision, recall 계산)
         n_p = i.sum()  # number of predictions
         if n_p == 0 or n_l == 0:
             continue
 
         # Accumulate FPs and TPs
-        fpc = (1 - tp[i]).cumsum(0)
+        '''
+            예시:
+            tp[i] = (N_preds_c, 10)  # 클래스 c에 해당하는 예측들에 대해, IoU threshold 10개 기준 TP 여부
+
+            예시 데이터:
+            [[ True,  True,  True,  True,  True,  True, False, False, False, False],
+            [False, False, False, False, False, False, False, False, False, False]]
+
+            → 각 행은 하나의 예측에 대해, 10개의 IoU 임계값에 대해 TP인지 여부를 나타냄
+            → 여기서 `tp[i]`는 클래스 c에 대한 예측만 추려낸 것
+
+            1 - tp[i] → False ↔ True로 반전됨 → FP 여부를 나타냄 (예측했지만 GT와 매칭되지 않은 경우)
+
+            fpc = (1 - tp[i]).cumsum(0)  
+                → IoU threshold 별로 FP의 누적합 (각 confidence 순서에서 몇 개 FP였는가)
+            tpc = tp[i].cumsum(0)
+                → IoU threshold 별로 TP의 누적합
+            cumsum(0): axis 0을 따라서 누적합 (0: 행을 따라서(1행, 2행, ...), 즉 아래방향)
+
+            이렇게 얻은 tpc, fpc를 기반으로:
+                recall = tpc / n_l  # n_l = 해당 클래스의 GT 개수
+                precision = tpc / (tpc + fpc)
+        '''
+        fpc = (1 - tp[i]).cumsum(0) # tp[i]: (class가 c인놈 iou 기준)
         tpc = tp[i].cumsum(0)
 
         # Recall

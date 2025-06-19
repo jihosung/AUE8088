@@ -173,19 +173,8 @@ class ComputeLoss:
                 # If prediction is matched (iou > 0.5) with bounding box marked as ignore,
                 # do not calculate objectness loss
 
-                # 추가: log
-                # print("iou before ign:",iou)
-                # print("[b,a,gj,ji,iou] before ign = ", b.shape, " ",a.shape, " ", gj.shape, " ", gi.shape, " ", iou.shape)
-
                 ign_idx = (tcls[i] == -1) & (iou > self.hyp["iou_t"])
                 keep = ~ign_idx
-
-                # 추가된 코드: custom validation set 사용 시 tensor가 비었을 때 예외처리 필요
-                # if (
-                #     keep.numel() == 0 or keep.sum() == 0 or
-                #     b.ndim == 0 or a.ndim == 0 or gj.ndim == 0 or gi.ndim == 0 or iou.ndim == 0
-                # ):
-                #     continue
                 
                 # 추가: bug detect
                 try:

@@ -261,6 +261,7 @@ def run(
 
         # Metrics
         for si, pred in enumerate(preds):
+            # pred = [x1, y1, x2, y2, conf, class] / 예측 박스 좌표 xyxy, confidence, class
             labels = targets[targets[:, 0] == si, 1:]
             nl, npr = labels.shape[0], pred.shape[0]  # number of labels, predictions
             path, shape = Path(paths[si]), shapes[si][0]
@@ -277,19 +278,25 @@ def run(
 
             # Predictions
             if single_cls:
-                pred[:, 5] = 0
+                pred[:, 5] = 0 # single class라면 예측은 모두 0
             predn = pred.clone()
             scale_boxes(ims[si].shape[1:], predn[:, :4], shape, shapes[si][1])  # native-space pred
 
             # Evaluate
             if nl:
-                tbox = xywh2xyxy(labels[:, 1:5])  # target boxes
-                scale_boxes(ims[si].shape[1:], tbox, shape, shapes[si][1])  # native-space labels
+                tbox = xywh2xyxy(labels[:, 1:5])  # target boxes (GT)
+                scale_boxes(ims[si].shape[1:], tbox, shape, shapes[si][1])  # native-space labels (GT)
                 labelsn = torch.cat((labels[:, 0:1], tbox), 1)  # native-space labels
-                correct = process_batch(predn, labelsn, iouv)
+                correct = process_batch(predn, labelsn, iouv) # 해당 iouv 기준 (0.5 ~ 0.95) 예측이 맞은 박스
+                """
+                    correct ex) 2 x 10 correct: 총 예측 박스 2개, 첫번째 박스는 iou = 0.75 기준까지 예측 성공, 두번째 박스는 모든 기준에서 예측 실패
+                    [[ True,  True,  True,  True,  True,  True, False, False, False, False],
+                    [False, False, False, False, False, False, False, False, False, False]]
+                """
                 if plots:
                     confusion_matrix.process_batch(predn, labelsn)
-            stats.append((correct, pred[:, 4], pred[:, 5], labels[:, 0]))  # (correct, conf, pcls, tcls)
+            # review) pred = [x1, y1, x2, y2, conf, class] / 예측 박스 좌표 xyxy, confidence, class
+            stats.append((correct, pred[:, 4], pred[:, 5], labels[:, 0]))  # (correct, confidence, prediction cls, target(GT) cls)
 
             # Save/log
             if save_txt:
@@ -357,13 +364,49 @@ def run(
         LOGGER.info(f"\nEvaluating mAP...")
 
         # Run evaluation: KAIST Multispectral Pedestrian Dataset
-        try:
-            # HACK: need to generate KAIST_annotation.json for your own validation set
-            if not os.path.exists('utils/eval/KAIST_val-split-by-manual_annotation.json'):
-                raise FileNotFoundError('Please generate KAIST_annotation.json for your own validation set. (See utils/eval/generate_kaist_ann_json.py)')
-            os.system(f"python3 utils/eval/kaisteval.py --annFile utils/eval/KAIST_val-split-by-manual_annotation.json --rstFile {pred_json}")
-        except Exception as e:
-            LOGGER.info(f"kaisteval unable to run: {e}")
+        
+        # 추가: dict
+        PAIR_dict = {
+            'val-split-byMAN.txt': {
+                'yaml': 'kaist-rgbt-split-byMAN.yaml',
+                'json': 'utils/eval/KAIST_val-split-byMAN_annotation.json'
+            },
+            'val-split-byGPT.txt': {
+                'yaml': 'data/kaist-rgbt-split-byGPT.yaml',
+                'json': 'utils/eval/KAIST_val-split-byGPT_annotation.json'
+            },
+            'val-split-byOPT.txt': {
+                'yaml': 'data/kaist-rgbt-split-byOPT.yaml',
+                'json': 'utils/eval/KAIST_val-split-byOPT_annotation.json'
+            }
+}
+        # 추가: 평가 실행 함수
+        def run_kaisteval(data, pair_dict):
+            for txt_path in data:
+                txt_name = os.path.basename(txt_path)
+
+                if txt_name in pair_dict:
+                    data_yaml = pair_dict[txt_name]['yaml']
+                    ann_json = pair_dict[txt_name]['json']
+
+                    try:
+                        LOGGER.info(f"\n▶ 평가 실행: {txt_name}")
+                        LOGGER.info(f"ann file: {ann_json}")
+                        os.system(f"python3 utils/eval/kaisteval.py --annFile {ann_json} --rstFile {pred_json}")
+                    except Exception as e:
+                        LOGGER.info(f"❌ 평가 실패: {txt_name}, 오류 내용: {e}")
+                else:
+                    LOGGER.info(f"⚠ pair_dict에 '{txt_name}' 항목이 없습니다.")
+
+        # 추가: 평가
+        run_kaisteval(data["val"], PAIR_dict)
+        # try:
+        #     # HACK: need to generate KAIST_annotation.json for your own validation set
+        #     if not os.path.exists('utils/eval/KAIST_val-split-byMAN_annotation.json'):
+        #         raise FileNotFoundError('Please generate KAIST_annotation.json for your own validation set. (See utils/eval/generate_kaist_ann_json.py)')
+        #     os.system(f"python3 utils/eval/kaisteval.py --annFile utils/eval/KAIST_val-split-byMAN_annotation.json --rstFile {pred_json}")
+        # except Exception as e:
+        #     LOGGER.info(f"kaisteval unable to run: {e}")
 
     # Return results
     model.float()  # for training

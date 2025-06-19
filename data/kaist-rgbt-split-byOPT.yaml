@@ -11,9 +11,9 @@
 path: datasets/kaist-rgbt
 train: # train files info (relative to 'path') 12,538 images
   # - train-split-bymanual.txt      # splitted dataset
-  - train-split-bymanual.txt
+  - train-split-byOPT.txt
 val: # val files info (relative to 'path')  12,538 images
-  - val-split-bymanual.txt      # splitted dataset
+  - val-split-byOPT.txt      # splitted dataset
   # - test-all-20.txt
 test: # test files info (optional)
   - test-all-20.txt
