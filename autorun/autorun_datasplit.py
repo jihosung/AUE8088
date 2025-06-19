@@ -1,4 +1,23 @@
 import subprocess
+# for debug:
+"""
+python train_simple.py \
+    --img 640 \
+    --batch-size 16 \
+    --epochs 20 \
+    --data data/kaist-rgbt-split-byMAN.yaml \
+    --cfg models/yolov5n_kaist-rgbt.yaml \
+    --weights yolov5n.pt \
+    --workers 4 \
+    --name debug \
+    --entity $WANDB_ENTITY \
+    --rgbt \
+    --single-cls \
+    --hyp data/hyps/hyp.scratch-low.yaml \
+    --optimizer SGD # SGD, Adam, AdamW\
+    # --cos-lr \
+    # --multi-scale
+"""
 
 # test various dataset split
 
