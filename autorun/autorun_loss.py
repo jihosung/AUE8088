@@ -43,7 +43,7 @@ for hyp_path in hyp_paths:
         --data data/kaist-rgbt-split-byOPT.yaml \
         --cfg models/yolov5n_kaist-rgbt.yaml \
         --weights yolov5n.pt \
-        --workers 4 \
+        --workers 8 \
         --name {run_name} \
         --entity $WANDB_ENTITY \
         --rgbt \
