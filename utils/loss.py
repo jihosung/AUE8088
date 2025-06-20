@@ -278,10 +278,10 @@ class ComputeLoss:
                 """
                 ign_idx = (tcls[i] == -1) & ((iou > self.hyp["iou_t"]) | (iop > self.hyp["iop_t"]))
                 keep = ~ign_idx
-                
+
                 # 추가: bug detect
                 try:
-                    b, a, gj, gi, iou = b[keep], a[keep], gj[keep], gi[keep], iou[keep]
+                    b, a, gj, gi, iou, iop = b[keep], a[keep], gj[keep], gi[keep], iou[keep], iop[keep]
                 except Exception as e:
                     print("🔥 Error during loss computation")
                     print("ign_idx:", ign_idx.shape)
@@ -289,7 +289,8 @@ class ComputeLoss:
                     print("[b,a,gj,ji,iou] = ", b.shape, " ",a.shape, " ", gj.shape, " ", gi.shape, " ", iou.shape)
                     raise e  # 또는 sys.exit(1)으로 강제 종료
                 
-                tobj[b, a, gj, gi] = iou  # iou ratio
+                # tobj[b, a, gj, gi] = iou  # iou ratio
+                tobj[b, a, gj, gi] = torch.maximum(iou, iop)  # 실험 Todo: people로 의심되는놈들만 무시 못하나? -> target box 너비가 더 큰놈들은 iop, 아니면 ioa
 
                 # 4. Classification
                 if self.nc > 1:  # cls loss (only if multiple classes)
