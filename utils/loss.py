@@ -274,6 +274,7 @@ class ComputeLoss:
                 학습하면 안되지만 그래도 사람 비슷하게 생겼으니 아예 무시하지는 말라는 의미에서,
                 thres 넘지 않는 것들은 "그정도 확률로 사람이다"는걸 학습시키는것임
                     -> 사람 아니면서 사람모양이니까 대충 0.3 근처가 적당하지 않을까? 생각함
+                    여러가지 실험 중 best: iou_t=0.5 iop_t=0.4
                 """
                 ign_idx = (tcls[i] == -1) & ((iou > self.hyp["iou_t"]) | (iop > self.hyp["iop_t"]))
                 keep = ~ign_idx
