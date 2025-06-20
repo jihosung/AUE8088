@@ -175,7 +175,10 @@ class ComputeLoss:
                 - anchor: tensor([0, 0, 1, 1, 1]) 0, 0, 1, 1, 1번째 anchor가 예측에 사용되었다는 뜻
             """
             b, a, gj, gi = indices[i]  # 이번 i번째 layer에서 예측값들 index 받아오기
-            tobj = torch.zeros(pi.shape[:4], dtype=pi.dtype, device=self.device)  # target obj: object가 있다 vs 없다에 해당하는 GT
+
+            # target obj: object 검출 시 맞을 확률 목표 (iou 기준)
+            # 초기값: 0
+            tobj = torch.zeros(pi.shape[:4], dtype=pi.dtype, device=self.device)  
 
             n = b.shape[0]  # number of targets
             if n: # b가 있다면 = i_th layer의 예측값이 존재한다면
@@ -232,7 +235,7 @@ class ComputeLoss:
                 """
                 pxy = pxy.sigmoid() * 2 - 0.5
                 pwh = (pwh.sigmoid() * 2) ** 2 * anchors[i]
-                pbox = torch.cat((pxy, pwh), 1)  # make predicted box. 여러개 나옴. 보통 300개?
+                pbox = torch.cat((pxy, pwh), 1)  # make predicted box
 
                 # 2-2. iou 계산
                 # iou = bbox_iou(pbox, tbox[i], CIoU=True).squeeze()  # original code
@@ -264,6 +267,14 @@ class ComputeLoss:
                 #   - 네. 아예 무시해버리면 사람 모양을 가졌지만 배경으로 학습시키는 꼴이 되어 실제 사람 학습에도 악영향을 끼칠 수 있음
                 #   - 그래서 적당히 사람 모양이면 사람인가? 하는 판단은 주고, 너무 많이 그쪽으로 치우치면 무시하도록
                 #   - people class에 대해 너무 치우치는 기준을 주기 위해(기존 iou의 한계점 발생 - 일정 이상 iou가 안올라감) IoP 도입
+                """
+                Todo:
+                IoU & IoP 다 계산해서 둘 중 하나라도 thres 넘기면 tobj로 등록하지 말기(아예 conf = 0 수렴을 위함)
+                thres 적당한값은... 모델이 정답이라 내뱉는 confidence 기준이 0.6
+                학습하면 안되지만 그래도 사람 비슷하게 생겼으니 아예 무시하지는 말라는 의미에서,
+                thres 넘지 않는 것들은 "그정도 확률로 사람이다"는걸 학습시키는것임
+                    -> 사람 아니면서 사람모양이니까 대충 0.3 근처가 적당하지 않을까? 생각함
+                """
                 ign_idx = (tcls[i] == -1) & ((iou > self.hyp["iou_t"]) | (iop > self.hyp["iop_t"]))
                 keep = ~ign_idx
                 
@@ -288,8 +299,11 @@ class ComputeLoss:
                 # Append targets to text file
                 # with open('targets.txt', 'a') as file:
                 #     [file.write('%11.5g ' * 4 % tuple(x) + '\n') for x in torch.cat((txy[i], twh[i]), 1)]
-
-            obji = self.BCEobj(pi[..., 4], tobj)
+            
+            # object loss 업데이트: 모델 예측 confidence score가 iou or iop를 따라가도록!
+            # pi[...,4]: confidence값
+            # tobj: target confidence값
+            obji = self.BCEobj(pi[..., 4], tobj) 
             lobj += obji * self.balance[i]  # obj loss
             if self.autobalance:
                 self.balance[i] = self.balance[i] * 0.9999 + 0.0001 / obji.detach().item()
