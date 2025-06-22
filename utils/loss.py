@@ -276,21 +276,30 @@ class ComputeLoss:
                     -> 사람 아니면서 사람모양이니까 대충 0.3 근처가 적당하지 않을까? 생각함
                     여러가지 실험 중 best: iou_t=0.5 iop_t=0.4
                 """
-                ign_idx = (tcls[i] == -1) & ((iou > self.hyp["iou_t"]) | (iop > self.hyp["iop_t"]))
+                ign_idx = (tcls[i] == -1) & ((iou > self.hyp["iou_t"]) | (iop > self.hyp["iop_t"])) # iou, iop 기준 무시할 idx
                 keep = ~ign_idx
+                tw = tbox[i][:, 2]  # target box width
+                th = tbox[i][:, 3]  # target box height
+                maybe_pp_idx = (tcls[i] == -1) & (tw > th) # target이 people이라고 의심되는 idx
+                keep_pp = keep & maybe_pp_idx # keep 중에서 people 의심 idx
+                keep_npp = keep & ~maybe_pp_idx # keep 중에서 people 의심 아닌 idx
 
                 # 추가: bug detect
                 try:
-                    b, a, gj, gi, iou, iop = b[keep], a[keep], gj[keep], gi[keep], iou[keep], iop[keep]
+                    b_pp,  a_pp,  gj_pp,  gi_pp  = b[keep_pp],  a[keep_pp],  gj[keep_pp],  gi[keep_pp]
+                    b_npp, a_npp, gj_npp, gi_npp = b[keep_npp], a[keep_npp], gj[keep_npp], gi[keep_npp]
+
+                    iou_pp,  iop_pp  = iou[keep_pp],  iop[keep_pp]
+                    iou_npp, iop_npp = iou[keep_npp], iop[keep_npp]
                 except Exception as e:
                     print("🔥 Error during loss computation")
-                    print("ign_idx:", ign_idx.shape)
-                    print("keep:", keep)
-                    print("[b,a,gj,ji,iou] = ", b.shape, " ",a.shape, " ", gj.shape, " ", gi.shape, " ", iou.shape)
+                    print("keep:", keep.shape, "keep_pp:", keep_pp.shape)
+                    print("[b,a,gj,gi] = ", b.shape, a.shape, gj.shape, gi.shape)
                     raise e  # 또는 sys.exit(1)으로 강제 종료
                 
-                # tobj[b, a, gj, gi] = iou  # iou ratio
-                tobj[b, a, gj, gi] = torch.maximum(iou, iop)  # 실험 Todo: people로 의심되는놈들만 무시 못하나? -> target box 너비가 더 큰놈들은 iop, 아니면 ioa
+                # tobj[b, a, gj, gi] = iou  # iou ratio # 실험 Todo: people로 의심되는놈들만 무시 못하나? -> target box 너비가 더 큰놈들은 iop, 아니면 ioa
+                tobj[b_pp, a_pp, gj_pp, gi_pp] = iop_pp # people 의심 target은 iop로
+                tobj[b_npp, a_npp, gj_npp, gi_npp] = iou_npp # 나머지는 iou로
 
                 # 4. Classification
                 if self.nc > 1:  # cls loss (only if multiple classes)

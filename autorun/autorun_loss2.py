@@ -11,7 +11,7 @@ python train_simple.py \
     --cfg models/yolov5n_kaist-rgbt.yaml \
     --weights yolov5n.pt \
     --workers 8 \
-    --name lossTest-tobj=max_iou_or_iop \
+    --name lossTest-tobj=pp_iop_npp_iou \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
