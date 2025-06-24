@@ -8,10 +8,10 @@ python train_simple.py \
     --batch-size 16 \
     --epochs 20 \
     --data data/kaist-rgbt-split-byOPT.yaml \
-    --cfg models/anchors/yolov5n_kaist-rgbt-anchor2.yaml \
+    --cfg models/for_aug/yolov5n_kaist-rgbt-aug.yaml \
     --weights yolov5n.pt \
     --workers 12 \
-    --name yolov5n-rgbt-IoU_anchor1-iouiop.4.5 \
+    --name debug-aug \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
