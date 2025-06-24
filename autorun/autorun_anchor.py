@@ -8,18 +8,19 @@ python train_simple.py \
     --batch-size 16 \
     --epochs 20 \
     --data data/kaist-rgbt-split-byOPT.yaml \
-    --cfg models/yolov5n_kaist-rgbt.yaml \
+    --cfg models/anchors/yolov5n_kaist-rgbt-anchor1.yaml \
     --weights yolov5n.pt \
-    --workers 4 \
-    --name debug-aug \
+    --workers 12 \
+    --name yolov5n-rgbt-IoU_anchor1-iouiop.4.5 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
-    --hyp data/hyps/for_aug/hyp.scratch-aug.yaml \
+    --hyp data/hyps/for_anchor/hyp.scratch-anchor.yaml \
     --optimizer SGD # SGD, Adam, AdamW\
     # --cos-lr \
     # --multi-scale
 """
+
 
 # Todo: 아래 코드 aug1, aug2... 등의 hyp 파일에 대해서 적용되도록 수정하기
 # hyp 파일들이 있는 디렉토리 & 패턴
