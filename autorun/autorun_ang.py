@@ -10,12 +10,12 @@ python train_simple.py \
     --data data/kaist-rgbt-split-byOPT.yaml \
     --cfg models/for_aug/yolov5n_kaist-rgbt-aug.yaml \
     --weights yolov5n.pt \
-    --workers 12 \
-    --name debug-aug \
+    --workers 8 \
+    --name aug-mosaic-0.0 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
-    --hyp data/hyps/for_aug/hyp.scratch-aug.yaml \
+    --hyp data/hyps/for_aug/hyp.scratch-aug-debug.yaml \
     --optimizer SGD # SGD, Adam, AdamW\
     # --cos-lr \
     # --multi-scale

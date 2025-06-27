@@ -185,7 +185,7 @@ def train(hyp, opt, device, callbacks):
         gs,
         single_cls,
         hyp=hyp,
-        augment=False,      # TODO: make it work
+        augment=True,      # TODO: make it work
         cache=None if opt.cache == "val" else opt.cache,
         rect=opt.rect,
         rank=-1,
@@ -205,7 +205,7 @@ def train(hyp, opt, device, callbacks):
     val_loader = create_dataloader(
         val_path,
         imgsz,
-        batch_size * 2,
+        batch_size * 2,   # gradient 계산이 없어서 메모리 사용이 더 적음 -> 더 큰 배치 사용 가능
         gs,
         single_cls,
         hyp=hyp,
