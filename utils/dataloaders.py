@@ -1274,114 +1274,229 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
 
         return img4, labels4 # xyxy
 
+    """
+    이거는 새로 시도했던 getitem 코드
+    mosaic else: 에서 for문을 풀어버리니까 evaluation이 잘 안됨. validation 과정에서 문제가 생기는것 같다.
+    """
+    # def __getitem__(self, index):
+    #     """Fetches the dataset item at the given index, considering linear, shuffled, or weighted sampling."""
+    #     index = self.indices[index]  # linear, shuffled, or image_weights
+
+    #     hyp = self.hyp
+    #     mosaic = self.mosaic and random.random() < hyp["mosaic"]
+    #     # 1. mosaic 적용 or 적용x / output: xyxy labels ===================================================================
+    #     if mosaic:
+    #         # raise NotImplementedError('Please make "mosaic" augmentation work!')
+
+    #         # TODO: Load mosaic
+
+    #         # log
+    #         # print("\x1b[s mosaic applied. \x1b[u", end='', flush=True)
+    #         # print("[mosaic] applied!")
+
+    #         (img_lwir, img_vis), labels = self.load_mosaic_rgbt(index) # labels: xyxy format
+    #         # print("mosaic img_lwir shape:", img_lwir.shape)
+    #         shapes = None
+
+    #         # TODO: MixUp augmentation
+    #         # if random.random() < hyp["mixup"]:
+    #         #     img, labels = mixup(img, labels, *self.load_mosaic(random.choice(self.indices)))
+
+    #     else: # mosaic 적용 안할때
+    #         # print("[mosaic] no mosaic!")
+    #         # Load image
+    #         # hw0s: original shapes, hw1s: resized shapes
+    #         (img_lwir, img_vis), hw0s, hw1s = self.load_image(index)
+    #         (h0, w0) = hw0s[0]
+    #         (h, w)= hw1s[0]
+
+    #         # Letterbox
+    #         shape = self.batch_shapes[self.batch[index]] if self.rect else self.img_size  # final letterboxed shape
+    #         img_lwir, ratio, pad = letterbox(img_lwir, shape, auto=False, scaleup=self.augment)
+    #         img_vis, _, _ = letterbox(img_vis, shape, auto=False, scaleup=self.augment)
+    #         shapes = (h0, w0), (ratio, pad)  # for COCO mAP rescaling
+
+    #         labels = self.labels[index].copy()
+    #         if labels.size:  # normalized xywh to pixel xyxy format
+    #             labels[:, 1:3] += labels[:, 3:5] / 2.0      # (x_lefttop, y_lefttop) -> (x_center, y_center)
+    #             labels[:, 1:] = xywhn2xyxy(labels[:, 1:], ratio[0] * w, ratio[1] * h, padw=pad[0], padh=pad[1])
+
+    #         # if self.augment:
+    #         #     raise NotImplementedError('Please make data augmentation work!')
+    #         #     # TODO: 여기도 random_perspective_rgbt로 바꾸기 -> 큰 for문 없애야할듯?
+    #         #     img, labels = random_perspective(
+    #         #         img,
+    #         #         labels,
+    #         #         degrees=hyp["degrees"],
+    #         #         translate=hyp["translate"],
+    #         #         scale=hyp["scale"],
+    #         #         shear=hyp["shear"],
+    #         #         perspective=hyp["perspective"],
+    #         #     )
+
+    #     # 2. 공통 augment 적용 ===================================================================
+    #     # TODO: mosaic 했으면 아래 공통 augment들은 안하는게 효과적인지? 아니면 공통으로 묶는게 효과적인지?
+    #     nl = len(labels)  # number of labels
+    #     if nl:
+    #         labels[:, 1:5] = xyxy2xywhn(labels[:, 1:5], w=img_lwir.shape[1], h=img_lwir.shape[0], clip=True, eps=1e-3) # 라벨 변환
+
+    #     # # 공통 augment
+    #     # if self.augment:
+    #     #     # Albumentations
+    #     #     # img, labels = self.albumentations(img, labels)
+    #     #     # nl = len(labels)  # update after albumentations
+
+    #     #     # HSV color-space, only vis
+    #     #     augment_hsv(img_vis, hgain=hyp["hsv_h"], sgain=hyp["hsv_s"], vgain=hyp["hsv_v"])
+
+    #     #     # Flip up-down
+    #     #     if random.random() < hyp["flipud"]:
+    #     #         img_lwir = np.flipud(img_lwir)
+    #     #         img_vis = np.flipud(img_vis)
+    #     #         if nl:
+    #     #             labels[:, 2] = 1 - labels[:, 2]
+
+    #     #     # Flip left-right
+    #     #     if random.random() < hyp["fliplr"]:
+    #     #         img_lwir = np.fliplr(img_lwir)
+    #     #         img_vis = np.fliplr(img_vis)
+    #     #         if nl:
+    #     #             labels[:, 1] = 1 - labels[:, 1]
+
+    #     #     # Cutouts
+    #     #     # labels = cutout(img, labels, p=0.5)
+    #     #     # nl = len(labels)  # update after cutout
+
+    #     # 3. prepare for output ===============================================
+    #     # for label output
+    #     labels_out = torch.zeros((nl, 7))
+    #     if nl:
+    #         labels_out[:, 1:] = torch.from_numpy(labels)
+
+    #     # Convert
+    #     img_lwir = img_lwir.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+    #     img_vis = img_vis.transpose((2, 0, 1))[::-1]
+    #     img_lwir = np.ascontiguousarray(img_lwir)
+    #     img_vis = np.ascontiguousarray(img_vis)
+
+    #     img_lwir = torch.from_numpy(img_lwir)
+    #     img_vis = torch.from_numpy(img_vis)
+
+    #     # Drop occlusion level
+    #     labels_out = labels_out[:, :-1]
+    #     # print("labels_out:", labels_out)
+    #     return (img_lwir, img_vis), labels_out, self.im_files[index], shapes, index
+    
+    """
+    이거는 실제로 mosaic를 써서 성능이 올랐던 getitem 코드
+    mosaic else: 부분 안건드리고 if mosaic: 부분만 건드림.
+    if mosaic: 를 거친 데이터들이 output이랑 동일하도록 형식만 맞춰줌.
+    """
     def __getitem__(self, index):
         """Fetches the dataset item at the given index, considering linear, shuffled, or weighted sampling."""
         index = self.indices[index]  # linear, shuffled, or image_weights
 
         hyp = self.hyp
         mosaic = self.mosaic and random.random() < hyp["mosaic"]
-        # 1. mosaic 적용 or 적용x / output: xyxy labels ===================================================================
         if mosaic:
-            # raise NotImplementedError('Please make "mosaic" augmentation work!')
+            print("\rMo", end='', flush=True)
 
-            # TODO: Load mosaic
-
-            # log
-            # print("\x1b[s mosaic applied. \x1b[u", end='', flush=True)
-            # print("[mosaic] applied!")
-
-            (img_lwir, img_vis), labels = self.load_mosaic_rgbt(index) # labels: xyxy format
-            # print("mosaic img_lwir shape:", img_lwir.shape)
+            # mosaic augmentation
+            (img_lwir, img_vis), labels = self.load_mosaic_rgbt(index)
             shapes = None
 
-            # TODO: MixUp augmentation
+            # # TODO: MixUp augmentation
             # if random.random() < hyp["mixup"]:
             #     img, labels = mixup(img, labels, *self.load_mosaic(random.choice(self.indices)))
 
-        else: # mosaic 적용 안할때
-            # print("[mosaic] no mosaic!")
+            nl = len(labels)  # number of labels
+            if nl:
+                labels[:, 1:5] = xyxy2xywhn(labels[:, 1:5], w=img_lwir.shape[1], h=img_lwir.shape[0], clip=True, eps=1e-3)
+
+            labels_out = torch.zeros((nl, 7))
+            if nl:
+                labels_out[:, 1:] = torch.from_numpy(labels)
+
+            # Convert
+            img_lwir = img_lwir.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+            img_lwir = np.ascontiguousarray(img_lwir)
+            img_vis = img_vis.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+            img_vis = np.ascontiguousarray(img_vis)
+
+            imgs = (torch.from_numpy(img_lwir), torch.from_numpy(img_vis))
+
+        else:
+            print("\rNomo", end='', flush=True)
             # Load image
             # hw0s: original shapes, hw1s: resized shapes
-            (img_lwir, img_vis), hw0s, hw1s = self.load_image(index)
-            (h0, w0) = hw0s[0]
-            (h, w)= hw1s[0]
+            imgs, hw0s, hw1s = self.load_image(index)
 
-            # Letterbox
-            shape = self.batch_shapes[self.batch[index]] if self.rect else self.img_size  # final letterboxed shape
-            img_lwir, ratio, pad = letterbox(img_lwir, shape, auto=False, scaleup=self.augment)
-            img_vis, _, _ = letterbox(img_vis, shape, auto=False, scaleup=self.augment)
-            shapes = (h0, w0), (ratio, pad)  # for COCO mAP rescaling
+            for ii, (img, (h0, w0), (h, w)) in enumerate(zip(imgs, hw0s, hw1s)):
+                # Letterbox
+                shape = self.batch_shapes[self.batch[index]] if self.rect else self.img_size  # final letterboxed shape
+                img, ratio, pad = letterbox(img, shape, auto=False, scaleup=self.augment)
+                shapes = (h0, w0), (ratio, pad)  # for COCO mAP rescaling
 
-            labels = self.labels[index].copy()
-            if labels.size:  # normalized xywh to pixel xyxy format
-                labels[:, 1:3] += labels[:, 3:5] / 2.0      # (x_lefttop, y_lefttop) -> (x_center, y_center)
-                labels[:, 1:] = xywhn2xyxy(labels[:, 1:], ratio[0] * w, ratio[1] * h, padw=pad[0], padh=pad[1])
+                labels = self.labels[index].copy()
+                if labels.size:  # normalized xywh to pixel xyxy format
+                    labels[:, 1:3] += labels[:, 3:5] / 2.0      # (x_lefttop, y_lefttop) -> (x_center, y_center)
+                    labels[:, 1:] = xywhn2xyxy(labels[:, 1:], ratio[0] * w, ratio[1] * h, padw=pad[0], padh=pad[1])
 
-            # if self.augment:
-            #     raise NotImplementedError('Please make data augmentation work!')
-            #     # TODO: 여기도 random_perspective_rgbt로 바꾸기 -> 큰 for문 없애야할듯?
-            #     img, labels = random_perspective(
-            #         img,
-            #         labels,
-            #         degrees=hyp["degrees"],
-            #         translate=hyp["translate"],
-            #         scale=hyp["scale"],
-            #         shear=hyp["shear"],
-            #         perspective=hyp["perspective"],
-            #     )
+                # TODO: 여기있는 augmentation 작동하게 만들기
+                # if self.augment:
+                #     raise NotImplementedError('Please make data augmentation work!')
 
-        # 2. 공통 augment 적용 ===================================================================
-        # TODO: mosaic 했으면 아래 공통 augment들은 안하는게 효과적인지? 아니면 공통으로 묶는게 효과적인지?
-        nl = len(labels)  # number of labels
-        if nl:
-            labels[:, 1:5] = xyxy2xywhn(labels[:, 1:5], w=img_lwir.shape[1], h=img_lwir.shape[0], clip=True, eps=1e-3) # 라벨 변환
+                #     img, labels = random_perspective(
+                #         img,
+                #         labels,
+                #         degrees=hyp["degrees"],
+                #         translate=hyp["translate"],
+                #         scale=hyp["scale"],
+                #         shear=hyp["shear"],
+                #         perspective=hyp["perspective"],
+                #     )
 
-        # # 공통 augment
-        # if self.augment:
-        #     # Albumentations
-        #     # img, labels = self.albumentations(img, labels)
-        #     # nl = len(labels)  # update after albumentations
+                nl = len(labels)  # number of labels
+                if nl:
+                    labels[:, 1:5] = xyxy2xywhn(labels[:, 1:5], w=img.shape[1], h=img.shape[0], clip=True, eps=1e-3)
 
-        #     # HSV color-space, only vis
-        #     augment_hsv(img_vis, hgain=hyp["hsv_h"], sgain=hyp["hsv_s"], vgain=hyp["hsv_v"])
+                # if self.augment:
+                #     # Albumentations
+                #     img, labels = self.albumentations(img, labels)
+                #     nl = len(labels)  # update after albumentations
 
-        #     # Flip up-down
-        #     if random.random() < hyp["flipud"]:
-        #         img_lwir = np.flipud(img_lwir)
-        #         img_vis = np.flipud(img_vis)
-        #         if nl:
-        #             labels[:, 2] = 1 - labels[:, 2]
+                #     # HSV color-space
+                #     augment_hsv(img, hgain=hyp["hsv_h"], sgain=hyp["hsv_s"], vgain=hyp["hsv_v"])
 
-        #     # Flip left-right
-        #     if random.random() < hyp["fliplr"]:
-        #         img_lwir = np.fliplr(img_lwir)
-        #         img_vis = np.fliplr(img_vis)
-        #         if nl:
-        #             labels[:, 1] = 1 - labels[:, 1]
+                #     # Flip up-down
+                #     if random.random() < hyp["flipud"]:
+                #         img = np.flipud(img)
+                #         if nl:
+                #             labels[:, 2] = 1 - labels[:, 2]
 
-        #     # Cutouts
-        #     # labels = cutout(img, labels, p=0.5)
-        #     # nl = len(labels)  # update after cutout
+                #     # Flip left-right
+                #     if random.random() < hyp["fliplr"]:
+                #         img = np.fliplr(img)
+                #         if nl:
+                #             labels[:, 1] = 1 - labels[:, 1]
 
-        # 3. prepare for output ===============================================
-        # for label output
-        labels_out = torch.zeros((nl, 7))
-        if nl:
-            labels_out[:, 1:] = torch.from_numpy(labels)
+                #     # Cutouts
+                #     # labels = cutout(img, labels, p=0.5)
+                #     # nl = len(labels)  # update after cutout
 
-        # Convert
-        img_lwir = img_lwir.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
-        img_vis = img_vis.transpose((2, 0, 1))[::-1]
-        img_lwir = np.ascontiguousarray(img_lwir)
-        img_vis = np.ascontiguousarray(img_vis)
+                labels_out = torch.zeros((nl, 7))
+                if nl:
+                    labels_out[:, 1:] = torch.from_numpy(labels)
 
-        img_lwir = torch.from_numpy(img_lwir)
-        img_vis = torch.from_numpy(img_vis)
+                # Convert
+                img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+                img = np.ascontiguousarray(img)
+
+                imgs[ii] = torch.from_numpy(img)
 
         # Drop occlusion level
         labels_out = labels_out[:, :-1]
-        # print("labels_out:", labels_out)
-        return (img_lwir, img_vis), labels_out, self.im_files[index], shapes, index
+        return imgs, labels_out, self.im_files[index], shapes, index
 
     def load_image(self, i):
         """
