@@ -386,6 +386,9 @@ def parse_model(d, ch):
             c2 = ch[f] // args[0] ** 2
         elif m is Fusion:
             c2 = ch[f] * args[1]
+            # c1s = [ch[x] for x in f] if isinstance(f, list) else [ch[f]]
+            # c1 = sum(c1s)
+            # c2 = c1 * args[1] if isinstance(args[1], int) else "unknown"
         else:
             c2 = ch[f]
 

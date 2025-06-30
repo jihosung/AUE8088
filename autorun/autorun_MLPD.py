@@ -5,16 +5,16 @@ cmd1 = """
 python train_simple.py \
     --img 640 \
     --batch-size 16 \
-    --epochs 20 \
+    --epochs 200 \
     --data data/kaist-rgbt-split-byOPT.yaml \
-    --cfg models/for_aug/yolov5n_kaist-rgbt-aug.yaml \
-    --weights yolov5n.pt \
+    --cfg models/yolov5n_kaist-rgbt-fromMLPD1.yaml \
+    --weights '' \
     --workers 8 \
-    --name Yolov5n-rgbt-hyp.scratch-aug-lowIoUIoPThres \
+    --name Yolov5n-rgbt-MLPD1 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
-    --hyp data/hyps/for_aug/hyp.scratch-aug-lowIoUIoPThres.yaml \
+    --hyp data/hyps/for_MLPD/hyp.scratch-MLPD.yaml \
     --optimizer SGD # SGD, Adam, AdamW\
     # --cos-lr \
     # --multi-scale
@@ -25,16 +25,16 @@ cmd2 = """
 python train_simple.py \
     --img 640 \
     --batch-size 16 \
-    --epochs 20 \
+    --epochs 200 \
     --data data/kaist-rgbt-split-byOPT.yaml \
-    --cfg models/for_aug/yolov5n_kaist-rgbt-aug.yaml \
-    --weights yolov5n.pt \
+    --cfg models/yolov5n_kaist-rgbt-fromMLPD2.yaml \
+    --weights '' \
     --workers 8 \
-    --name Yolov5n-rgbt-hyp.scratch-aug-highScale \
+    --name Yolov5n-rgbt-MLPD2 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
-    --hyp data/hyps/for_aug/hyp.scratch-aug-highScale.yaml \
+    --hyp data/hyps/for_MLPD/hyp.scratch-MLPD.yaml \
     --optimizer SGD # SGD, Adam, AdamW\
     # --cos-lr \
     # --multi-scale
@@ -44,5 +44,5 @@ python train_simple.py \
 print("🚀 Running first command...")
 subprocess.run(cmd1, shell=True, check=True)
 
-print("🚀 Running second command...")
-subprocess.run(cmd2, shell=True, check=True)
+# print("🚀 Running second command...")
+# subprocess.run(cmd2, shell=True, check=True)
