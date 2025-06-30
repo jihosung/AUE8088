@@ -11,11 +11,11 @@ python train_simple.py \
     --cfg models/for_aug/yolov5n_kaist-rgbt-aug.yaml \
     --weights yolov5n.pt \
     --workers 8 \
-    --name aug-merge-working-code \
+    --name Yolov5n-rgbt-mosaic0.5-mixup0.2 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
-    --hyp data/hyps/for_aug/hyp.scratch-aug-debug.yaml \
+    --hyp data/hyps/for_aug/hyp.scratch-aug-mosaic-0.5-mixup-0.2.yaml \
     --optimizer SGD # SGD, Adam, AdamW\
     # --cos-lr \
     # --multi-scale
