@@ -5,16 +5,16 @@ cmd1 = """
 python train_simple.py \
     --img 640 \
     --batch-size 16 \
-    --epochs 100 \
+    --epochs 20 \
     --data data/kaist-rgbt-split-byOPT.yaml \
-    --cfg models/yolov5n_kaist-rgbt-fromMLPD3.yaml \
-    --weights '' \
+    --cfg models/yolov5n_kaist-rgbt-fromMLPD2.yaml \
+    --weights MLPD2.pt \
     --workers 4 \
-    --name Yolov5n-rgbt-MLPD3 \
+    --name Yolov5n-rgbt-MLPD2-warm-anchor2 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
-    --hyp data/hyps/for_MLPD/hyp.scratch-MLPD.yaml \
+    --hyp data/hyps/for_MLPD/hyp.scratch-MLPD-warm.yaml \
     --optimizer SGD # SGD, Adam, AdamW\
     # --cos-lr \
     # --multi-scale
@@ -25,12 +25,12 @@ cmd2 = """
 python train_simple.py \
     --img 640 \
     --batch-size 16 \
-    --epochs 20 \
+    --epochs 100 \
     --data data/kaist-rgbt-split-byOPT.yaml \
     --cfg models/yolov5n_kaist-rgbt-fromMLPD2.yaml \
-    --weights MLPD2.pt \
+    --weights '' \
     --workers 4 \
-    --name Yolov5n-rgbt-MLPD2-warm \
+    --name Yolov5n-rgbt-MLPD2-notWarm-anchor2 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
