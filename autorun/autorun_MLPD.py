@@ -5,12 +5,12 @@ cmd1 = """
 python train_simple.py \
     --img 640 \
     --batch-size 16 \
-    --epochs 200 \
+    --epochs 100 \
     --data data/kaist-rgbt-split-byOPT.yaml \
-    --cfg models/yolov5n_kaist-rgbt-fromMLPD1.yaml \
+    --cfg models/yolov5n_kaist-rgbt-fromMLPD3.yaml \
     --weights '' \
-    --workers 8 \
-    --name Yolov5n-rgbt-MLPD1 \
+    --workers 4 \
+    --name Yolov5n-rgbt-MLPD3 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
@@ -25,12 +25,12 @@ cmd2 = """
 python train_simple.py \
     --img 640 \
     --batch-size 16 \
-    --epochs 200 \
+    --epochs 20 \
     --data data/kaist-rgbt-split-byOPT.yaml \
     --cfg models/yolov5n_kaist-rgbt-fromMLPD2.yaml \
-    --weights '' \
-    --workers 8 \
-    --name Yolov5n-rgbt-MLPD2 \
+    --weights MLPD2.pt \
+    --workers 4 \
+    --name Yolov5n-rgbt-MLPD2-warm \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \
@@ -44,5 +44,5 @@ python train_simple.py \
 print("🚀 Running first command...")
 subprocess.run(cmd1, shell=True, check=True)
 
-# print("🚀 Running second command...")
-# subprocess.run(cmd2, shell=True, check=True)
+print("🚀 Running second command...")
+subprocess.run(cmd2, shell=True, check=True)
