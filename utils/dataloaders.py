@@ -1349,7 +1349,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
                 )
 
                 # GT box 일부 가리기
-                imgs = hide_GT_box(imgs, labels)
+                imgs = hide_GT_box(imgs, labels, hideprob=hyp["halfGT"])
 
             nl = len(labels)  # number of labels
             if nl:

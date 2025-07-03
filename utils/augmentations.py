@@ -585,7 +585,7 @@ def swap_center_region(imgs):
 
     return (lwir_out, vis_out)
 
-def hide_GT_box(imgs, labels):
+def hide_GT_box(imgs, labels, hideprob):
     """
     labels: xyxy
     """
@@ -600,7 +600,7 @@ def hide_GT_box(imgs, labels):
         box_w = x2 - x1
         box_h = y2 - y1
         
-        if random.random() < 0.2:
+        if random.random() < hideprob:
             # 'top', 'bottom', 'left', 'right' 중 하나를 무작위로 선택
             occlusion_type = random.choice(['top', 'bottom', 'left', 'right'])
             
