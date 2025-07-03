@@ -24,13 +24,13 @@ python train_simple.py \
 cmd2 = """
 python train_simple.py \
     --img 640 \
-    --batch-size 16 \
+    --batch-size 8 \
     --epochs 100 \
     --data data/kaist-rgbt-split-byOPT.yaml \
-    --cfg models/yolov5n_kaist-rgbt-fromMLPD2.yaml \
+    --cfg models/yolov5s_kaist-rgbt-fromMLPD2.yaml \
     --weights '' \
     --workers 4 \
-    --name Yolov5n-rgbt-MLPD2-notWarm-anchor2 \
+    --name Yolov5s-rgbt-MLPD2-anchor2 \
     --entity $WANDB_ENTITY \
     --rgbt \
     --single-cls \

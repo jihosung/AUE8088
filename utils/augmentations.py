@@ -545,3 +545,79 @@ class ToTensor:
         im = im.half() if self.half else im.float()  # uint8 to fp16/32
         im /= 255.0  # 0-255 to 0.0-1.0
         return im
+    
+def swap_center_region(imgs):
+    """
+    두 이미지의 중앙 320x320 영역을 서로 바꿉니다.
+
+    Args:
+        img_lwir (np.ndarray): LWIR(장적외선) 이미지 배열.
+        img_vis (np.ndarray): VIS(가시광선) 이미지 배열.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: 중앙 영역이 교체된 (LWIR, VIS) 이미지 튜플.
+    """
+    # 입력 이미지의 높이와 너비 가져오기 (두 이미지의 크기가 같다고 가정)
+    (img_lwir, img_vis) = imgs
+    h, w = img_lwir.shape[:2]
+
+    # 중앙 좌표 계산
+    center_x, center_y = w // 2, h // 2
+
+    # 320x320 영역의 시작점과 끝점 계산
+    start_x = center_x - 160
+    end_x = center_x + 160
+    start_y = center_y - 160
+    end_y = center_y + 160
+
+    # 원본 이미지를 변경하지 않기 위해 복사본 생성
+    lwir_out = img_lwir.copy()
+    vis_out = img_vis.copy()
+
+    # 교체를 위해 원본 lwir 이미지의 중앙 영역을 임시 저장
+    temp_lwir_center = img_lwir[start_y:end_y, start_x:end_x].copy()
+
+    # vis 이미지의 중앙 영역을 lwir 복사본에 삽입
+    lwir_out[start_y:end_y, start_x:end_x] = img_vis[start_y:end_y, start_x:end_x]
+    
+    # 임시 저장해둔 lwir 중앙 영역을 vis 복사본에 삽입
+    vis_out[start_y:end_y, start_x:end_x] = temp_lwir_center
+
+    return (lwir_out, vis_out)
+
+def hide_GT_box(imgs, labels):
+    """
+    labels: xyxy
+    """
+    (img_lwir, img_vis) = imgs
+    img_lwir = img_lwir.copy()
+    img_vis = img_vis.copy()
+
+    for lb in labels:
+        print("lb:", lb)
+        x1, y1, x2, y2 = lb[1:5]
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+        box_w = x2 - x1
+        box_h = y2 - y1
+        
+        if random.random() < 0.2:
+            # 'top', 'bottom', 'left', 'right' 중 하나를 무작위로 선택
+            occlusion_type = random.choice(['top', 'bottom', 'left', 'right'])
+            
+            # 선택된 방향에 따라 영역을 회색(114)으로 채움
+            if occlusion_type == 'left':
+                img_lwir[y1:y2, x1 : x1 + box_w // 2] = 114
+                img_vis[y1:y2, x1 : x1 + box_w // 2] = 114
+            elif occlusion_type == 'right':
+                img_lwir[y1:y2, x1 + box_w // 2 : x2] = 114
+                img_vis[y1:y2, x1 + box_w // 2 : x2] = 114
+            elif occlusion_type == 'top':
+                img_lwir[y1 : y1 + box_h // 2, x1:x2] = 114
+                img_vis[y1 : y1 + box_h // 2, x1:x2] = 114
+            elif occlusion_type == 'bottom':
+                img_lwir[y1 + box_h // 2 : y2, x1:x2] = 114
+                img_vis[y1 + box_h // 2 : y2, x1:x2] = 114
+
+    return (img_lwir, img_vis)
+
+

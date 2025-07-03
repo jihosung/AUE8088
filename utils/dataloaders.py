@@ -38,6 +38,8 @@ from utils.augmentations import (
     mixup_rgbt,
     random_perspective,
     random_perspective_rgbt,
+    swap_center_region,
+    hide_GT_box,
 )
 from utils.general import (
     DATASETS_DIR,
@@ -1286,6 +1288,7 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
 
         hyp = self.hyp
         mosaic = self.mosaic and random.random() < hyp["mosaic"]
+        # mosaic = False
         if mosaic:
             print("\rMo", end='', flush=True)
 
@@ -1345,6 +1348,9 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
                     perspective=hyp["perspective"],
                 )
 
+                # GT box 일부 가리기
+                imgs = hide_GT_box(imgs, labels)
+
             nl = len(labels)  # number of labels
             if nl:
                 labels[:, 1:5] = xyxy2xywhn(labels[:, 1:5], w=imgs[0].shape[1], h=imgs[0].shape[0], clip=True, eps=1e-3)
@@ -1376,6 +1382,10 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
                 # labels = cutout(img, labels, p=0.5)
                 # nl = len(labels)  # update after cutout
                 imgs = (img_lwir, img_vis)
+
+                # swap center region
+                if random.random() < hyp["swapcenter"]:
+                    imgs = swap_center_region(imgs)
 
             labels_out = torch.zeros((nl, 7))
             if nl:
