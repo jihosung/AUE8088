@@ -1302,6 +1302,11 @@ class LoadRGBTImagesAndLabels(LoadImagesAndLabels):
                 imgs, labels = mixup_rgbt(imgs, labels, *self.load_mosaic_rgbt(random.choice(self.indices)))
                 (img_lwir, img_vis) = imgs
 
+            # GT box 일부 가리기
+            imgs = (img_lwir, img_vis)
+            imgs = hide_GT_box(imgs, labels, hideprob=hyp["halfGT"])
+            (img_lwir, img_vis) = imgs
+
             nl = len(labels)  # number of labels
             if nl:
                 labels[:, 1:5] = xyxy2xywhn(labels[:, 1:5], w=img_lwir.shape[1], h=img_lwir.shape[0], clip=True, eps=1e-3)

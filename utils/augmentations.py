@@ -594,7 +594,6 @@ def hide_GT_box(imgs, labels, hideprob):
     img_vis = img_vis.copy()
 
     for lb in labels:
-        print("lb:", lb)
         x1, y1, x2, y2 = lb[1:5]
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         box_w = x2 - x1
@@ -602,21 +601,23 @@ def hide_GT_box(imgs, labels, hideprob):
         
         if random.random() < hideprob:
             # 'top', 'bottom', 'left', 'right' 중 하나를 무작위로 선택
-            occlusion_type = random.choice(['top', 'bottom', 'left', 'right'])
+            # occlusion_type = random.choice(['top', 'bottom', 'left', 'right'])
+            occlusion_type = 'bottom'
             
             # 선택된 방향에 따라 영역을 회색(114)으로 채움
+            den = 4 # 1/den 만큼 가리기
             if occlusion_type == 'left':
-                img_lwir[y1:y2, x1 : x1 + box_w // 2] = 114
-                img_vis[y1:y2, x1 : x1 + box_w // 2] = 114
+                img_lwir[y1:y2, x1 : x1 + box_w // den] = 114
+                img_vis[y1:y2, x1 : x1 + box_w // den] = 114
             elif occlusion_type == 'right':
-                img_lwir[y1:y2, x1 + box_w // 2 : x2] = 114
-                img_vis[y1:y2, x1 + box_w // 2 : x2] = 114
+                img_lwir[y1:y2, x2 - box_w // den : x2] = 114
+                img_vis[y1:y2, x2 - box_w // den : x2] = 114
             elif occlusion_type == 'top':
-                img_lwir[y1 : y1 + box_h // 2, x1:x2] = 114
-                img_vis[y1 : y1 + box_h // 2, x1:x2] = 114
+                img_lwir[y1 : y1 + box_h // den, x1:x2] = 114
+                img_vis[y1 : y1 + box_h // den, x1:x2] = 114
             elif occlusion_type == 'bottom':
-                img_lwir[y1 + box_h // 2 : y2, x1:x2] = 114
-                img_vis[y1 + box_h // 2 : y2, x1:x2] = 114
+                img_lwir[y2 - box_h // den : y2, x1:x2] = 114
+                img_vis[y2 - box_h // den : y2, x1:x2] = 114
 
     return (img_lwir, img_vis)
 
